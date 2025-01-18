@@ -29,8 +29,8 @@ export function BookRow({ book }: { book: Book }) {
 
 const styles = StyleSheet.create({
   bookRow: {
-    width: screenWidth / 2 -10,
-    height: 300,
+    width: screenWidth / 2 -30,
+    height: 250,
     //backgroundColor: "#222629",
     borderRadius: 10,
     color: "white",
