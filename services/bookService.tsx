@@ -23,9 +23,17 @@ export const getUserBook = (userId: string, bookId: string) => {
 }
 
 export const getBooksList = (page: number) => {
-  return fetch(BaseUrl+"/v1/getbooklist?page="+page)
+  const url = BaseUrl+"/getbookslist/v1?page="+page;
+  return fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json' 
+    }
+  }) 
     .then(response => response.json())
     .then(books => {
+      console.log(books);
       return books;
     })
     .catch(error => {
