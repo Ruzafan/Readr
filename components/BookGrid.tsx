@@ -1,14 +1,21 @@
 import { View, StyleSheet, FlatList,Text } from "react-native";
 import Book from "@/models/book";
 import { BookRow } from "./BookRow";
-import { getBooksList } from "../services/bookService";
+import { getBooksList, getUserBooksList } from "../services/bookService";
 import React, { useEffect, useState } from "react";
 import { UserId } from "@/constants/UserId";
 import { ScrollView } from "react-native-gesture-handler";
-export function BookGrid() {
+export function BookGrid(userId: string) {
   const [bookList, setBookList] = useState(new Array());
   const [page, setPage] = useState(1);
   useEffect(() => {
+    if (userId) {
+      getUserBooksList(page).then((res) => {
+        setBookList(res);
+      });
+    }else{
+      getBooks();
+    }
     getBooks();
   }, [page]);
   const getBooks = () => {

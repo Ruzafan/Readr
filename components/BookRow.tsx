@@ -5,12 +5,11 @@ import { Link } from "expo-router";
 const screenWidth = Dimensions.get('window').width;
 
 export function BookRow({ book }: { book: Book }) {
-  
 
   return (
           <Link
         href={{
-          pathname: "/userBookDetail",
+          pathname: "/bookDetail",
           params: { bookId: book.id },
         }}
       >

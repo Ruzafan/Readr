@@ -1,8 +1,9 @@
 import Book from '@/models/book';
+import User from '@/models/user';
 import {useState} from 'react';
 import { Image, View, ScrollView,StyleSheet, Platform } from 'react-native';
 import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
-import { getUserBook } from "../services/bookService";
+import { getUserBook, getUser } from "../services/bookService";
 import { UserId } from '@/constants/UserId';
 import { 
   Text, 
@@ -16,35 +17,29 @@ import {
 import { Rating } from 'react-native-ratings'; 
 
 export default function BookDetailScreen(){
-    /*const local = useLocalSearchParams();
+    const local = useLocalSearchParams();
     const { bookId} = local;
     let [book, setBook] = useState(new Book());
+    let [user, setUser] = useState(new User());
     debugger;
     getUserBook(UserId, bookId as string).then((response) => 
     {
         setBook(response);
-    });*/
-    const book = {
-        title: 'The Lord of the Rings',
-        author: 'J.R.R. Tolkien',
-        genre: 'Fantasy',
-        description: 'A young hobbit named Frodo Baggins finds himself the unexpected bearer of The One Ring, a powerful artifact sought by the Dark Lord Sauron.',
-        coverImage: 'https://example.com/lord-of-the-rings-cover.jpg',
-        userRating: 4.5, 
-        user: {
-          name: 'John Doe',
-          avatarUrl: 'https://picsum.photos/50/50',
-        }
-      };
+    });
+
+    getUser(UserId as string).then((response) =>
+    {
+       setUser(response);
+    });
 
       return (
         <ScrollView style={{ flex: 1 }}>
           <View style={{ padding: 20 }}>
             <Card>
-              <Card.Cover source={{ uri: book.coverImage }} />
+              <Card.Cover source={{ uri: book.image }} />
               <Card.Content>
                 <Title>{book.title}</Title>
-                <Paragraph>{book.author}</Paragraph>
+                <Paragraph>{book.authors}</Paragraph>
                 <Chip icon="tag" style={{ marginRight: 5 }}>{book.genre}</Chip>
               </Card.Content>
             </Card>
@@ -52,14 +47,14 @@ export default function BookDetailScreen(){
             <Divider style={{ marginVertical: 10 }} />
     
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar.Image size={40} source={{ uri: book.user.avatarUrl }} />
+              <Avatar.Image size={40} source={{ uri: user.image }} />
               <View style={{ marginLeft: 10 }}>
-                <Text>{book.user.name}</Text>
+                <Text>{user.name}</Text>
                 <Rating 
                     type='custom' 
                     ratingCount={5} 
                     imageSize={20} 
-                    startingValue={book.userRating} 
+                    startingValue={4} 
                     readonly 
                     tintColor="#f0f0f0" 
                     ratingBackgroundColor="#c8c8c8" 
@@ -71,7 +66,7 @@ export default function BookDetailScreen(){
             <Divider style={{ marginVertical: 10 }} />
     
             <Text style={{ fontWeight: 'bold' }}>Description</Text>
-            <Paragraph>{book.description}</Paragraph>
+            <Paragraph>{book.sinopsis}</Paragraph>
     
             {/* Add more details here if needed (e.g., publication date, ISBN) */}
           </View>
