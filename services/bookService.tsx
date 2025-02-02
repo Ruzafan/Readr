@@ -13,7 +13,12 @@ export const getUserBooksList = (userId: string) => {
 
 export const getUserBook = (userId: string, bookId: string) => {
     return fetch(BaseUrl+'/userbook/v1/'+userId+'/'+bookId)
-    .then(response => response.json())
+    .then(response => {
+      if(response.status < 300){
+        return response.json();
+      }
+      return null;
+    })
     .then(books => books)
     .catch(error => {
       console.error(error);

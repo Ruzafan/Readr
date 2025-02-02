@@ -1,7 +1,7 @@
 import Book from '@/models/book';
 import User from '@/models/user';
 import {useState, useEffect} from 'react';
-import { Image, View, ScrollView,StyleSheet, Platform } from 'react-native';
+import { Image, View, ScrollView,StyleSheet, Platform, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { getBook, getUserBook, assignBookToUser } from "../services/bookService"; // Import the new service
 import { UserId } from '@/constants/UserId';
@@ -17,6 +17,8 @@ import {
   TextInput
 } from 'react-native-paper';
 import { Rating } from 'react-native-ratings'; 
+
+const screenWidth = Dimensions.get('window').width;
 
 export default function BookDetailScreen(){
     const local = useLocalSearchParams();
@@ -71,18 +73,18 @@ export default function BookDetailScreen(){
 
       return (
         <ScrollView style={{ flex: 1 }}>
-          <View style={{ padding: 20 }}>
-            <View style={styles.bookRow}>
-                    
-                      <Image
-                        source={{ uri: book.image }}
-                        style={styles.image}
-                        alt={book.title}
-                      />
-                      <Text>
-                        {book.title}
-                      </Text>
-            </View>
+          <View style={styles.container}>
+            <Text style={styles.text}>Title: </Text>
+            <Text style={styles.title}>
+                     {book.title}
+            </Text>
+            
+            <Image
+            source={{ uri: book.image }}
+            style={styles.image}
+            alt={book.title}
+            />
+            <Text style={styles.text}>Rating:</Text>       
             <Rating
                 type='star'
                 ratingCount={5}
@@ -91,7 +93,7 @@ export default function BookDetailScreen(){
                 onFinishRating={setRating} // Update state on rating change
                 style={{ paddingVertical: 10 }}
             />
-
+            <Text style={styles.text}>Comment: </Text>
             <TextInput
                 style={{ height: 80, borderColor: 'gray', borderWidth: 1, marginTop: 10, padding: 5 }}
                 placeholder="Your comments..."
@@ -115,23 +117,26 @@ export default function BookDetailScreen(){
 }
 
 const styles = StyleSheet.create({
-  bookRow: {
-    width: 180,
-    height: 250,
-    //backgroundColor: "#222629",
-    borderRadius: 10,
-    color: "white",
-    textAlign: "center",
-    display: "flex",
-    justifyContent: "center",
-    padding: 10,
-    cursor: "pointer",
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  },
+    container: {
+        padding: 20,
+        marginTop: 100,
+        justifyContent: "center",
+
+    },
   image: {
-    width: "100%",
-    height: "100%",
+    width: screenWidth / 2,
+    height: "70%",
     borderRadius: 12,
+    alignSelf: "center"
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: "bold",
+    margin: 10,
   }
 });
