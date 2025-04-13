@@ -7,3 +7,26 @@ expo-env.d.ts
 
 /node_modules
 node_modules
+ios/.gitignore
+ios/.xcode.env
+ios/Podfile
+ios/Podfile.properties.json
+ios/Readr/AppDelegate.h
+ios/Readr/AppDelegate.mm
+ios/Readr/Info.plist
+ios/Readr/main.m
+ios/Readr/noop-file.swift
+ios/Readr/Readr-Bridging-Header.h
+ios/Readr/Readr.entitlements
+ios/Readr/SplashScreen.storyboard
+ios/Readr/Images.xcassets/Contents.json
+ios/Readr/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png
+ios/Readr/Images.xcassets/AppIcon.appiconset/Contents.json
+ios/Readr/Images.xcassets/SplashScreenBackground.colorset/Contents.json
+ios/Readr/Images.xcassets/SplashScreenLogo.imageset/Contents.json
+ios/Readr/Images.xcassets/SplashScreenLogo.imageset/image.png
+ios/Readr/Images.xcassets/SplashScreenLogo.imageset/image@2x.png
+ios/Readr/Images.xcassets/SplashScreenLogo.imageset/image@3x.png
+ios/Readr/Supporting/Expo.plist
+ios/Readr.xcodeproj/project.pbxproj
+ios/Readr.xcodeproj/xcshareddata/xcschemes/Readr.xcscheme

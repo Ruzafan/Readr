@@ -3,6 +3,6 @@ export default class Book {
     image: string | undefined;
     title: string | undefined;
     authors: string[] | undefined;
-    genre: string | undefined;
-    sinopsis: string | undefined;
+    genres: Array<string> | undefined;
+    description: string | undefined;
 }

@@ -1,2 +1,3 @@
-export const BaseUrl = "http:/192.168.1.102/library";
-export const BaseUrlPostman = "https://af45c530-95d6-4ecd-93a2-d82ecde7f79b.mock.pstmn.io";
+export const BaseLibraryUrl = "https://readr-ehdng5bbf5c7bycz.canadacentral-01.azurewebsites.net/library";
+export const BaseUserApiUrl = "https://readrusers-aqh0ajedfkeeeehp.canadacentral-01.azurewebsites.net/user";
+export const OpenLibraryUrl = "https://openlibrary.org";

@@ -1,10 +1,8 @@
 import Book from '@/models/book';
-import User from '@/models/user';
-import {useState, useEffect} from 'react';
-import { Image, View, ScrollView,StyleSheet, Platform, Dimensions } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { getBook, getUserBook, assignBookToUser } from "../services/bookService"; // Import the new service
-import { UserId } from '@/constants/UserId';
+import { getBook, assignBookToUser } from '@/services/bookServiceAxios';
 import { 
   Text, 
   Card, 
@@ -12,131 +10,168 @@ import {
   Paragraph, 
   Divider, 
   Chip, 
-  Avatar,
-  Button,
-  TextInput
+  Button, 
+  TextInput,
+  useTheme 
 } from 'react-native-paper';
-import { Rating } from 'react-native-ratings'; 
+import { Rating } from 'react-native-ratings';
 
 const screenWidth = Dimensions.get('window').width;
 
-export default function BookDetailScreen(){
-    const local = useLocalSearchParams();
-    const {bookId} = local;
-    const [rating, setRating] = useState(0);
-    const [comments, setComments] = useState("");
-    const [book, setBook] = useState(new Book());
-    const [isAssigned, setIsAssigned] = useState(false); // State to track assignment
-    const UserId = "1";
-    useEffect(() => {
-        const fetchBookData = async () => {
-            try{
-                const userBookResponse = await getUserBook(UserId, bookId as string);
-                if(userBookResponse){
-                    setRating(userBookResponse.rating);
-                    setComments(userBookResponse.comments);
-                    setIsAssigned(true);
-                    setBook(userBookResponse);
-                }
-            }catch(error){
-                console.error("Error fetching book:", error);
-            }
+export default function BookDetailScreen() {
+  const { bookId } = useLocalSearchParams();
+  const [book, setBook] = useState(new Book());
+  const [isAssigned, setIsAssigned] = useState(false);
+  const [rating, setRating] = useState(3);
+  const [comments, setComments] = useState('');
+  const theme = useTheme();
 
-            if(!isAssigned)
-            {
-                try {
-                    const bookResponse = await getBook(bookId as string);
-                    setBook(bookResponse);
-                } catch (error) {
-                    console.error("Error fetching book:", error);
-                    // Handle error, e.g., display an error message
-                }
-            }
-            
-        };
+  useEffect(() => {
+    fetchBookData();
+  }, [isAssigned]);
 
-        fetchBookData();
-    }, [bookId]); // Add bookId to dependency array
+  const fetchBookData = async () => {
+    try {
+      const bookResponse = await getBook(bookId as string);
+      setBook(bookResponse);
+      setIsAssigned(false);
+    } catch (error) {
+      console.error('Error fetching book:', error);
+    }
+  };
 
-    const handleAssignBook = async () => {
-        try {
-            const userId = "1";
-            assignBookToUser(userId, bookId as string,rating, comments).then( () =>{
-                setIsAssigned(true);
-                alert("Book assigned to you!");
-            } ) 
-        } catch (error) {
-            console.error("Error assigning book:", error);
-            alert("Error assigning the book. Please try again.");
-        }
-    };
+  const handleAssignBook = async () => {
+    try {
+      await assignBookToUser(bookId as string, rating, comments);
+      setIsAssigned(true);
+      alert('Book assigned to you!');
+    } catch (error) {
+      console.error('Error assigning book:', error);
+      alert('Error assigning the book. Please try again.');
+    }
+  };
 
-      return (
-        <ScrollView style={{ flex: 1 }}>
-          <View style={styles.container}>
-            <Text style={styles.text}>Title: </Text>
-            <Text style={styles.title}>
-                     {book.title}
-            </Text>
-            
-            <Image
-            source={{ uri: book.image }}
-            style={styles.image}
-            alt={book.title}
-            />
-            <Text style={styles.text}>Rating:</Text>       
-            <Rating
-                type='star'
-                ratingCount={5}
-                imageSize={40}
-                startingValue={rating} // Controlled by state
-                onFinishRating={setRating} // Update state on rating change
-                style={{ paddingVertical: 10 }}
-            />
-            <Text style={styles.text}>Comment: </Text>
-            <TextInput
-                style={{ height: 80, borderColor: 'gray', borderWidth: 1, marginTop: 10, padding: 5 }}
-                placeholder="Your comments..."
-                multiline={true} // Allow multiple lines
-                value={comments} // Controlled by state
-                onChangeText={setComments} // Update state on text change
-            />
-            {!isAssigned &&
-                <Button 
-                    mode="contained" 
-                    onPress={handleAssignBook}
-                    disabled={isAssigned} // Disable if already assigned
-                    style={{ marginTop: 20 }}
-                >
-                    {isAssigned ? "Book Assigned" : "Assign Book to Me"} {/* Change button text */}
-                </Button>
-            }
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Card style={styles.card}>
+        <View style={styles.coverContainer}>
+          <Card.Cover source={{ uri: book.image }} style={styles.coverImage} />
+          <View style={styles.bookInfo}>
+            <Card.Content>
+              <Title>{book.title}</Title>
+              <Paragraph>{book.authors}</Paragraph>
+              <View style={styles.chipsContainer}>
+                {book.genres?.map((genre, index) => (
+                  <Chip key={index} icon="tag" style={styles.chip}>
+                    {genre}
+                  </Chip>
+                ))}
+              </View>
+            </Card.Content>
           </View>
-        </ScrollView>
-      );
+        </View>
+      </Card> 
+
+      <Card style={styles.descriptionCard}>
+        <Card.Content>
+          <Text variant="bodyMedium">{book.description || 'No description available.'}</Text>
+        </Card.Content>
+      </Card>
+
+      {!isAssigned && (
+        <Card style={styles.formCard}>
+          <Card.Content>
+            <Text style={styles.sectionTitle}>Rate this book</Text>
+            <Rating
+              startingValue={rating}
+              onFinishRating={setRating}
+              imageSize={28}
+              tintColor={theme.colors.background}
+              ratingBackgroundColor="#ccc"
+              style={{ marginVertical: 10 }}
+            />
+
+            <TextInput
+              label="Comments (optional)"
+              value={comments}
+              onChangeText={setComments}
+              multiline
+              numberOfLines={3}
+              mode="outlined"
+              style={{ marginTop: 12 }}
+            />
+
+            <Button
+              mode="contained"
+              onPress={handleAssignBook}
+              style={styles.assignButton}
+            >
+              Assign Book to Me
+            </Button>
+          </Card.Content>
+        </Card>
+      )}
+
+      {isAssigned && (
+        <Card style={styles.confirmCard}>
+          <Card.Content>
+            <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>
+              ✅ This book has been assigned to you.
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        marginTop: 100,
-        justifyContent: "center",
-
-    },
-  image: {
-    width: screenWidth / 2,
-    height: "70%",
-    borderRadius: 12,
-    alignSelf: "center"
+  scrollContent: {
+    padding: 16,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+  card: {
+    marginBottom: 16,
   },
-  text: {
+  coverContainer: {
+    flexDirection: 'row',
+    padding: 12,
+  },
+  coverImage: {
+    width: 120,
+    height: 180,
+    borderRadius: 8,
+  },
+  bookInfo: {
+    flex: 1,
+    paddingLeft: 12,
+    justifyContent: 'center',
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  chip: {
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  descriptionCard: {
+    marginBottom: 16,
+    padding: 8,
+  },
+  formCard: {
+    padding: 12,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: "bold",
-    margin: 10,
-  }
+  },
+  assignButton: {
+    marginTop: 16,
+  },
+  confirmCard: {
+    padding: 12,
+    backgroundColor: '#d1f5d3',
+  },
 });

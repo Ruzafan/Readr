@@ -1,49 +1,53 @@
-import { Image, View, StyleSheet, Platform,Text, Dimensions } from "react-native";
+import React from "react";
+import {
+  Image,
+  View,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import Book from "@/models/book";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
-export function BookRow({ book }: { book: Book }) {
+export function BookRow({ book, customLibrary }: { book: Book, customLibrary: boolean }) {
+  const router = useRouter();
+
+  const handlePress = async () => {
+    const route = customLibrary ? "/userBookDetail" : "/bookDetail";
+    router.push({
+      pathname: route,
+      params: { bookId: book.id },
+    });
+  };
 
   return (
-          <Link
-        href={{
-          pathname: "/bookDetail",
-          params: { bookId: book.id },
-        }}
-      >
-        
-        <View style={styles.bookRow}>
-        
-          <Image
-            source={{ uri: book.image }}
-            style={styles.image}
-            alt={book.title}
-          />
-        </View>
-      </Link>
+    <TouchableOpacity onPress={handlePress}>
+      <View style={styles.bookRow}>
+        <Image
+          source={{ uri: book.image }}
+          style={styles.image}
+          alt={book.title}
+        />
+      </View>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   bookRow: {
-    width: screenWidth / 2 -30,
+    width: screenWidth / 2 - 30,
     height: 250,
-    //backgroundColor: "#222629",
     borderRadius: 10,
-    color: "white",
-    textAlign: "center",
-    display: "flex",
     justifyContent: "center",
     padding: 10,
-    cursor: "pointer",
-    flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   image: {
     width: "100%",
     height: "100%",
     borderRadius: 12,
-  }
+  },
 });

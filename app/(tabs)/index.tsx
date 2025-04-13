@@ -1,28 +1,57 @@
-import { SafeAreaView, StyleSheet } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { BookGrid } from '@/components/BookGrid';
+import Login from '@/components/Login';
+import * as SecureStore from 'expo-secure-store';
+import { useFocusEffect } from 'expo-router';
+import { ActivityIndicator, Surface, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (<SafeAreaView>
-    <BookGrid />
-  </SafeAreaView>
+  const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+  
+  useFocusEffect(
+    useCallback(() => {
+      const checkToken = async () => {
+        setLoading(true);
+        try {
+          const storedToken = await SecureStore.getItemAsync('token');
+          setToken(storedToken || '');
+        } catch (error) {
+          console.error('Error retrieving token:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      checkToken();
+    }, [])
+  );
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      {loading ? (
+        <Surface style={styles.loadingContainer} elevation={2}>
+          <ActivityIndicator animating={true} size="large" />
+        </Surface>
+      ) : token ? (
+        <BookGrid />
+      ) : (
+        <Login onLoginSuccess={setToken} />
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+    margin: 16,
+    borderRadius: 12,
+    padding: 16,
   },
 });
