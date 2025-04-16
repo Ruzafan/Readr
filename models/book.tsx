@@ -5,4 +5,5 @@ export default class Book {
     authors: string[] | undefined;
     genres: Array<string> | undefined;
     description: string | undefined;
+    wished: boolean | undefined;
 }

@@ -36,7 +36,7 @@ export default function HomeScreen() {
         <Surface style={styles.loadingContainer} elevation={2}>
           <ActivityIndicator animating={true} size="large" />
         </Surface>
-      ) : token ? (
+      ) : token != '' ? (
         <BookGrid />
       ) : (
         <Login onLoginSuccess={setToken} />

@@ -1,7 +1,7 @@
-import { StyleSheet, View, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
-import { getUserBook, updateBook } from "../services/bookServiceAxios";
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getUserBook, updateBook, deleteBook, deleteUserBook } from "../services/bookServiceAxios";
 import { getUser } from '@/services/userService';
 import {
   Text,
@@ -19,6 +19,8 @@ import { Rating } from 'react-native-ratings';
 export default function BookDetailScreen() {
   const { colors, dark } = useTheme();
   const params = useLocalSearchParams();
+  const router = useRouter();
+
   const [book, setBook] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [description, setDescription] = useState('');
@@ -33,7 +35,7 @@ export default function BookDetailScreen() {
   const fetchBookData = async () => {
     const fetchedBook = await getUserBook(params.bookId as string);
     setBook(fetchedBook);
-    setDescription(fetchedBook.sinopsis || '');
+    setDescription(fetchedBook.comments || '');
     setRating(fetchedBook.rating || 4);
   };
 
@@ -61,6 +63,33 @@ export default function BookDetailScreen() {
       rating
     });
     alert("Book details saved!");
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Book",
+      "Are you sure you want to delete this book from your library?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteUserBook(book.id);
+              alert("Book deleted.");
+              router.replace("/"); // Redirect after deletion
+            } catch (error) {
+              console.error("Error deleting book:", error);
+              alert("Failed to delete the book.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -147,6 +176,16 @@ export default function BookDetailScreen() {
 
           <Divider style={styles.divider} />
           <Button mode="contained" onPress={saveChanges}>Save Changes</Button>
+          <Button
+            mode="outlined"
+            onPress={handleDelete}
+            style={{ marginTop: 10 }}
+            buttonColor="red"
+            textColor="white"
+            icon="delete"
+          >
+            Delete Book
+          </Button>
         </View>
       )}
     </ScrollView>

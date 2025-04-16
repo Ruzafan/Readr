@@ -64,7 +64,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       const response = await register(email, password, name, surname, image);
 
       Alert.alert('Registered', 'You can now log in!');
-      setIsRegistering(false); // Go back to login screen
+      setIsRegistering(false);
     } catch (error) {
       console.error(error);
       Alert.alert('Registration Failed', 'An error occurred.');
@@ -83,9 +83,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       setLoading(true);
       const response = await login(email, password);
       await SecureStore.setItem('token', response.token);
-      await SecureStore.setItemAsync('user', email);
+      await SecureStore.setItemAsync('username', email);
       await SecureStore.setItemAsync('password', password);
-      Alert.alert('Success', 'Logged in successfully!');
       onLoginSuccess?.(response.token);
     } catch (error) {
       Alert.alert('Login Failed', error as string);

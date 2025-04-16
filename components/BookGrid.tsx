@@ -38,7 +38,7 @@ export function BookGrid({ books, onLoadMore, loading = false }: BookGridProps) 
   };
 
   const handleMore = () => {
-    setPage((prevPage) => prevPage + 1);
+    setPage(page + 1);
     onLoadMore?.();
   };
 
@@ -58,7 +58,7 @@ export function BookGrid({ books, onLoadMore, loading = false }: BookGridProps) 
           style={styles.bookGrid}
           onEndReached={books ? onLoadMore : handleMore}
           renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={true} />}
-          numColumns={2}
+          numColumns={3}
           scrollEnabled
         />
       )}

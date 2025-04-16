@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   FlatList,
-  Dimensions,
   SafeAreaView,
   Modal,
 } from 'react-native';
@@ -12,7 +11,6 @@ import BookCreationForm from '@/components/BookCreationForm';
 import { ActivityIndicator, Searchbar, useTheme, FAB } from 'react-native-paper';
 import { BookRow } from '@/components/BookRow';
 
-
 export default function TabTwoScreen() {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -20,9 +18,37 @@ export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const handleSearch = async () => {
+  useEffect(() => {
+    if (page === 1) return;
+    fetchBooks();
+  }, [page]);
+
+  const fetchBooks = async () => {
+    if (!hasMore || loading) return;
+
     setLoading(true);
+    try {
+      const results = await getBooksList(page, searchText);
+      if (results.length === 0) {
+        setHasMore(false);
+      } else {
+        setSearchResults((prev) => [...prev, ...results]);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startNewSearch = async () => {
+    setLoading(true);
+    setSearchResults([]);
+    setPage(1);
+    setHasMore(true);
     try {
       const results = await getBooksList(1, searchText);
       setSearchResults(results);
@@ -33,23 +59,32 @@ export default function TabTwoScreen() {
     }
   };
 
-  useEffect(() => {
-    handleSearch();
-  }, []);
-
   const handleCreateBook = async (bookData: any) => {
     setModalVisible(false);
     setLoading(true);
     try {
       await createBook(bookData);
       setSearchText(bookData.title);
-      await handleSearch();
+      await startNewSearch();
     } catch (error) {
       console.error("Error creating book:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleMore = () => {
+    if (!loading && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const renderBook = useCallback(
+    ({ item }: { item: any }) => (
+      <BookRow book={item} customLibrary={false} />
+    ),
+    []
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -58,33 +93,35 @@ export default function TabTwoScreen() {
           placeholder="Search books..."
           value={searchText}
           onChangeText={setSearchText}
-          onSubmitEditing={handleSearch}
-          onIconPress={handleSearch}
+          onSubmitEditing={startNewSearch}
+          onIconPress={startNewSearch}
           loading={loading}
         />
       </View>
 
-      {loading && (
+      {loading && searchResults.length === 0 && (
         <View style={{ padding: 16, alignItems: 'center' }}>
           <ActivityIndicator size="large" />
         </View>
       )}
 
-      {!loading && (
-        <FlatList
-          data={searchResults}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={false} />}
-          numColumns={2}
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: 50 + insets.bottom,
-            justifyContent: 'center', 
-            alignItems: 'center', 
-          }}
-          style={{ flex: 1 }}
-        />
-      )}
+      <FlatList
+        data={searchResults}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderBook}
+        numColumns={3}
+        onEndReached={handleMore}
+        onEndReachedThreshold={0.5}
+        removeClippedSubviews
+        initialNumToRender={12}
+        contentContainerStyle={{
+          padding: 16,
+          paddingBottom: 50 + insets.bottom,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        style={{ flex: 1 }}
+      />
 
       <FAB
         icon="plus"
@@ -114,7 +151,7 @@ export default function TabTwoScreen() {
         >
           <View
             style={{
-              backgroundColor: theme.colors.elevation.level2, 
+              backgroundColor: theme.colors.elevation.level2,
               borderRadius: 12,
               maxHeight: '90%',
               width: '95%',
@@ -128,7 +165,6 @@ export default function TabTwoScreen() {
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 }

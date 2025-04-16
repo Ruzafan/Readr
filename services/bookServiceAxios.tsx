@@ -37,7 +37,7 @@ export const getBook = async (bookId: string) => {
 // Get list of books with pagination
 export const getBooksList = async (page: number, searchText: string) => {
   try {
-    const response = await api.get(`/books/v1?page=${page}&rows=10&filter=${searchText}`);
+    const response = await api.get(`/books/v1?page=${page}&rows=20&filter=${searchText}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -60,7 +60,7 @@ export const assignBookToUser = async (bookId: string, rating: number, comments:
 
 export const updateBook = async (book: object) => {
   try {
-    const response = await api.put(`/userbook/v1`, book);
+    const response = await api.post(`/userbook/v1`, book);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -93,3 +93,33 @@ export const createBook = async (book: {
   });
   return response.data;
 };
+
+export const wishlist = async (bookId: string) => {
+  try {
+    const response = await api.post(`/wishlist/v1`, {"bookId": bookId});
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export const deleteUserBook = async (bookId: string) => {
+  try {
+    const response = await api.delete(`/userbook/v1?bookId=`+bookId);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export const deleteBook = async (bookId: string) => {
+  try {
+    const response = await api.delete(`/book/v1?bookId=`+bookId);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}

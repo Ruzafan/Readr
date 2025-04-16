@@ -1,18 +1,18 @@
 import Book from '@/models/book';
 import { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { getBook, assignBookToUser } from '@/services/bookServiceAxios';
-import { 
-  Text, 
-  Card, 
-  Title, 
-  Paragraph, 
-  Divider, 
-  Chip, 
-  Button, 
+import { View, ScrollView, StyleSheet, Dimensions, Alert } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { getBook, assignBookToUser, deleteBook } from '@/services/bookServiceAxios';
+import {
+  Text,
+  Card,
+  Title,
+  Paragraph,
+  Divider,
+  Chip,
+  Button,
   TextInput,
-  useTheme 
+  useTheme
 } from 'react-native-paper';
 import { Rating } from 'react-native-ratings';
 
@@ -50,7 +50,32 @@ export default function BookDetailScreen() {
       alert('Error assigning the book. Please try again.');
     }
   };
-
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Book",
+      "Are you sure you want to delete this book from your library?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteBook(bookId as string);
+              alert("Book deleted.");
+              router.back();
+            } catch (error) {
+              console.error("Error deleting book:", error);
+              alert("Failed to delete the book.");
+            }
+          }
+        }
+      ]
+    );
+  };
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <Card style={styles.card}>
@@ -70,7 +95,7 @@ export default function BookDetailScreen() {
             </Card.Content>
           </View>
         </View>
-      </Card> 
+      </Card>
 
       <Card style={styles.descriptionCard}>
         <Card.Content>
@@ -121,6 +146,17 @@ export default function BookDetailScreen() {
           </Card.Content>
         </Card>
       )}
+
+      <Button
+        mode="outlined"
+        onPress={handleDelete}
+        style={{ marginTop: 10 }}
+        buttonColor="red"
+        textColor="white"
+        icon="delete"
+      >
+        Delete Book
+      </Button>
     </ScrollView>
   );
 }
