@@ -4,6 +4,7 @@ import {
   FlatList,
   SafeAreaView,
   Modal,
+  Text,
 } from 'react-native';
 import { createBook, getBooksList } from '@/services/bookServiceAxios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,9 +21,13 @@ export default function TabTwoScreen() {
   const theme = useTheme();
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [skipEffect, setSkipEffect] = useState(false);
 
   useEffect(() => {
-    if (page === 1) return;
+    if (page === 1 && skipEffect) {
+      setSkipEffect(false);
+      return;
+    }
     fetchBooks();
   }, [page]);
 
@@ -32,10 +37,10 @@ export default function TabTwoScreen() {
     setLoading(true);
     try {
       const results = await getBooksList(page, searchText);
-      if (results.length === 0) {
+      if (!results || results.length === 0) {
         setHasMore(false);
       } else {
-        setSearchResults((prev) => [...prev, ...results]);
+        setSearchResults(prev => [...prev, ...results]);
       }
     } catch (error) {
       console.error("Search error:", error);
@@ -47,13 +52,17 @@ export default function TabTwoScreen() {
   const startNewSearch = async () => {
     setLoading(true);
     setSearchResults([]);
-    setPage(1);
     setHasMore(true);
+    setSkipEffect(true);
+    setPage(1);
     try {
       const results = await getBooksList(1, searchText);
-      setSearchResults(results);
+      setSearchResults(results ?? []);
+      setHasMore((results?.length ?? 0) > 0);
     } catch (error) {
       console.error("Search error:", error);
+      setSearchResults([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -75,7 +84,7 @@ export default function TabTwoScreen() {
 
   const handleMore = () => {
     if (!loading && hasMore) {
-      setPage((prev) => prev + 1);
+      setPage(prev => prev + 1);
     }
   };
 
@@ -95,7 +104,6 @@ export default function TabTwoScreen() {
           onChangeText={setSearchText}
           onSubmitEditing={startNewSearch}
           onIconPress={startNewSearch}
-          loading={loading}
         />
       </View>
 
@@ -105,23 +113,31 @@ export default function TabTwoScreen() {
         </View>
       )}
 
-      <FlatList
-        data={searchResults}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderBook}
-        numColumns={3}
-        onEndReached={handleMore}
-        onEndReachedThreshold={0.5}
-        removeClippedSubviews
-        initialNumToRender={12}
-        contentContainerStyle={{
-          padding: 16,
-          paddingBottom: 50 + insets.bottom,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        style={{ flex: 1 }}
-      />
+      {!loading && searchResults.length === 0 && (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: theme.colors.onBackground }}>
+          No books found.
+        </Text>
+      )}
+
+      {!loading && searchResults.length > 0 && (
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderBook}
+          numColumns={3}
+          onEndReached={handleMore}
+          onEndReachedThreshold={0.5}
+          removeClippedSubviews
+          initialNumToRender={12}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: 50 + insets.bottom,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          style={{ flex: 1 }}
+        />
+      )}
 
       <FAB
         icon="plus"

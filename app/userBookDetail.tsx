@@ -1,6 +1,6 @@
-import { StyleSheet, View, ScrollView, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Alert , Image} from 'react-native';
 import { useEffect, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter , useNavigation} from 'expo-router';
 import { getUserBook, updateBook, deleteBook, deleteUserBook } from "../services/bookServiceAxios";
 import { getUser } from '@/services/userService';
 import {
@@ -20,6 +20,7 @@ export default function BookDetailScreen() {
   const { colors, dark } = useTheme();
   const params = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
 
   const [book, setBook] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
@@ -37,6 +38,7 @@ export default function BookDetailScreen() {
     setBook(fetchedBook);
     setDescription(fetchedBook.comments || '');
     setRating(fetchedBook.rating || 4);
+    navigation.setOptions({ title: fetchedBook.title || 'Book Detail' });
   };
 
   const fetchUserData = async () => {
@@ -81,7 +83,7 @@ export default function BookDetailScreen() {
             try {
               await deleteUserBook(book.id);
               alert("Book deleted.");
-              router.replace("/"); // Redirect after deletion
+              router.replace("/");
             } catch (error) {
               console.error("Error deleting book:", error);
               alert("Failed to delete the book.");
@@ -98,7 +100,7 @@ export default function BookDetailScreen() {
         <View>
           <View style={styles.bookCard}>
             <View style={styles.bookRow}>
-              <Card.Cover source={{ uri: book.image }} style={styles.bookImage} />
+              <Image source={{ uri: book.image }} style={styles.bookImage} />
               <View style={styles.bookDetails}>
                 <Card.Content>
                   <Title style={[styles.bookTitle, { color: colors.onBackground }]}>{book.title}</Title>

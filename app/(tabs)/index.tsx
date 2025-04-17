@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { BookGrid } from '@/components/BookGrid';
 import Login from '@/components/Login';
 import * as SecureStore from 'expo-secure-store';
@@ -11,7 +11,7 @@ export default function HomeScreen() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
-  
+
   useFocusEffect(
     useCallback(() => {
       const checkToken = async () => {
@@ -33,9 +33,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {loading ? (
-        <Surface style={styles.loadingContainer} elevation={2}>
-          <ActivityIndicator animating={true} size="large" />
-        </Surface>
+        <View style={{ padding: 16, alignItems: 'center' }}>
+          <ActivityIndicator size="large" />
+        </View>
       ) : token != '' ? (
         <BookGrid />
       ) : (
@@ -45,13 +45,4 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 16,
-    borderRadius: 12,
-    padding: 16,
-  },
-});
+

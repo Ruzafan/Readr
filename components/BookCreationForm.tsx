@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import {
   StyleSheet,
-  Image,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
+  View
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -126,14 +122,14 @@ export default function BookCreationForm({ onSubmit, onCancel }: BookFormProps) 
               </Card>
             )}
 
-            <Surface style={styles.buttonRow}>
+            <View style={styles.buttonRow}>
               <Button mode="outlined" onPress={onCancel} style={styles.flexButton}>
                 Cancel
               </Button>
               <Button mode="contained" onPress={handleCreate} style={styles.flexButton}>
                 Create
               </Button>
-            </Surface>
+            </View>
           </Surface>
         </ScrollView>
   );

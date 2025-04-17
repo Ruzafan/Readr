@@ -52,3 +52,18 @@ export const register = (userName: string, password: string, name: string, surna
       console.error(error);
     });
 }
+
+
+export const uploadProfileImage = async (image: any) => {
+  const formData = new FormData();
+  formData.append('image', {
+    uri: image.uri,
+    name: image.name,
+    type: image.type,
+  } as any);
+  return apiUser.patch(BaseUserApiUrl+'/v1/updateprofile', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

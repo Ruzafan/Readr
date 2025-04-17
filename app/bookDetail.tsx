@@ -1,7 +1,7 @@
 import Book from '@/models/book';
 import { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Dimensions, Alert } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { View, ScrollView, StyleSheet, Dimensions, Alert, Image } from 'react-native';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { getBook, assignBookToUser, deleteBook } from '@/services/bookServiceAxios';
 import {
   Text,
@@ -11,10 +11,8 @@ import {
   Divider,
   Chip,
   Button,
-  TextInput,
   useTheme
 } from 'react-native-paper';
-import { Rating } from 'react-native-ratings';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -22,9 +20,9 @@ export default function BookDetailScreen() {
   const { bookId } = useLocalSearchParams();
   const [book, setBook] = useState(new Book());
   const [isAssigned, setIsAssigned] = useState(false);
-  const [rating, setRating] = useState(3);
-  const [comments, setComments] = useState('');
   const theme = useTheme();
+  const navigation = useNavigation();
+  
 
   useEffect(() => {
     fetchBookData();
@@ -34,7 +32,8 @@ export default function BookDetailScreen() {
     try {
       const bookResponse = await getBook(bookId as string);
       setBook(bookResponse);
-      setIsAssigned(false);
+      navigation.setOptions({ title: bookResponse.title || 'Book Detail' });
+      setIsAssigned(bookResponse.isAssigned);
     } catch (error) {
       console.error('Error fetching book:', error);
     }
@@ -42,7 +41,7 @@ export default function BookDetailScreen() {
 
   const handleAssignBook = async () => {
     try {
-      await assignBookToUser(bookId as string, rating, comments);
+      await assignBookToUser(bookId as string);
       setIsAssigned(true);
       alert('Book assigned to you!');
     } catch (error) {
@@ -80,7 +79,7 @@ export default function BookDetailScreen() {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <Card style={styles.card}>
         <View style={styles.coverContainer}>
-          <Card.Cover source={{ uri: book.image }} style={styles.coverImage} />
+          <Image source={{ uri: book.image }} style={styles.coverImage} />
           <View style={styles.bookInfo}>
             <Card.Content>
               <Title>{book.title}</Title>
@@ -95,37 +94,14 @@ export default function BookDetailScreen() {
             </Card.Content>
           </View>
         </View>
-      </Card>
-
-      <Card style={styles.descriptionCard}>
+        <Divider />
+        <Text style={{ fontWeight: 'bold', marginLeft: 12, marginTop: 20 }}>Description: </Text>
         <Card.Content>
           <Text variant="bodyMedium">{book.description || 'No description available.'}</Text>
         </Card.Content>
       </Card>
 
       {!isAssigned && (
-        <Card style={styles.formCard}>
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Rate this book</Text>
-            <Rating
-              startingValue={rating}
-              onFinishRating={setRating}
-              imageSize={28}
-              tintColor={theme.colors.background}
-              ratingBackgroundColor="#ccc"
-              style={{ marginVertical: 10 }}
-            />
-
-            <TextInput
-              label="Comments (optional)"
-              value={comments}
-              onChangeText={setComments}
-              multiline
-              numberOfLines={3}
-              mode="outlined"
-              style={{ marginTop: 12 }}
-            />
-
             <Button
               mode="contained"
               onPress={handleAssignBook}
@@ -133,8 +109,6 @@ export default function BookDetailScreen() {
             >
               Assign Book to Me
             </Button>
-          </Card.Content>
-        </Card>
       )}
 
       {isAssigned && (

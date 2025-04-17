@@ -1,52 +1,45 @@
-import React, { useEffect } from 'react';
-import { ScrollView, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, Modal, View, Image } from 'react-native';
+
 import {
   Avatar,
   Title,
-  Paragraph,
-  List,
   Divider,
   Caption,
   useTheme,
   Surface,
   Button,
+  Text,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
-import { login, getUser } from '@/services/userService';
+import * as ImagePicker from 'expo-image-picker';
+
+
+import { getUser, uploadProfileImage } from '@/services/userService';
+
 import { router } from 'expo-router';
+import User from '@/models/user';
 
 const ProfileScreen = () => {
   const theme = useTheme();
-
-  const user = {
-    name: 'John Doe',
-    username: 'johndoe',
-    bio: 'This is a sample bio about the user.',
-    location: 'San Francisco, CA',
-    email: 'john.doe@example.com',
-    phone: '+1 555 123 4567',
-    website: 'https://www.example.com',
-    social: [
-      { icon: 'facebook', link: 'https://www.facebook.com/johndoe' },
-      { icon: 'twitter', link: 'https://www.twitter.com/johndoe' },
-      { icon: 'instagram', link: 'https://www.instagram.com/johndoe' },
-    ],
-  };
-
-  const loginRequest = async () => {
-    const username = 'Marc';
-    const password = 'password';
-    const token = await login(username, password);
-    await SecureStore.setItemAsync('secure_token', token);
-    await SecureStore.setItemAsync('user', username);
-    await SecureStore.setItemAsync('password', password);
-    const response = await getUser();
-    console.log(response);
-  };
+  const [user, setUser] = useState<User>();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [image, setImage] = useState<{
+    
+    
+      uri: string;
+      name: string;
+      type: string;
+    } | null>(null);
 
   useEffect(() => {
-    loginRequest();
+    const fetchUser = async () => {
+      const userData = await getUser();
+      console.log(userData)
+      setUser(userData);
+    };
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
@@ -60,54 +53,69 @@ const ProfileScreen = () => {
     }
   };
 
+  const pickImage = async () => {
+    
+   const result = await ImagePicker.launchImageLibraryAsync({
+    
+    
+         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+         
+         allowsEditing: true,
+         
+         quality: 0.7,
+       });
+   
+       if (!result.canceled && result.assets.length > 0) {
+         const asset = result.assets[0];
+         const fileName = asset.uri.split('/').pop() || 'image.jpg';
+         
+         const fileType = asset.type || 'image/jpeg';
+         
+   
+         setImage({
+           uri: asset.uri,
+           
+           name: fileName,
+           type: fileType,
+         });
+       }
+  };
+
+  const handleSaveImage = async () => {
+    
+    if (!image) return;
+    
+
+    try {
+      await uploadProfileImage(image); // your backend should return the updated user or image url
+      
+      
+      
+      setModalVisible(false);
+      const updatedUser = await getUser(); // re-fetch to update view
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      
+    }
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <SafeAreaView>
         <Surface style={{ padding: 24, margin: 16, borderRadius: 12, elevation: 2 }}>
+          <Title style={{ textAlign: 'center' }}>{user?.name}</Title>
           <Avatar.Image
             size={100}
-            source={{ uri: 'https://picsum.photos/200' }}
+            
+            source={{ uri: user?.image }}
+            
             style={{ alignSelf: 'center', marginBottom: 16 }}
+            onTouchEnd={() => setModalVisible(true)}
           />
-          <Title style={{ textAlign: 'center' }}>{user.name}</Title>
-          <Caption style={{ textAlign: 'center', marginBottom: 8 }}>{user.username}</Caption>
-          <Paragraph style={{ textAlign: 'center' }}>{user.bio}</Paragraph>
+          <Title style={{ textAlign: 'center' }}>{user?.name} {user?.surname}</Title>
+          <Caption style={{ textAlign: 'center', marginBottom: 8 }}>{user?.userName}</Caption>
         </Surface>
-
-        <List.Section title="Contact">
-          <List.Item
-            title="Location"
-            description={user.location}
-            left={(props) => <List.Icon {...props} icon="map-marker" />}
-          />
-          <List.Item
-            title="Email"
-            description={user.email}
-            left={(props) => <List.Icon {...props} icon="email" />}
-          />
-          <List.Item
-            title="Phone"
-            description={user.phone}
-            left={(props) => <List.Icon {...props} icon="phone" />}
-          />
-          <List.Item
-            title="Website"
-            description={user.website}
-            left={(props) => <List.Icon {...props} icon="web" />}
-            onPress={() => Linking.openURL(user.website)}
-          />
-        </List.Section>
-
-        <List.Section title="Social">
-          {user.social.map((social) => (
-            <List.Item
-              key={social.icon}
-              title={social.icon.charAt(0).toUpperCase() + social.icon.slice(1)}
-              left={(props) => <List.Icon {...props} icon={social.icon} />}
-              onPress={() => Linking.openURL(social.link)}
-            />
-          ))}
-        </List.Section>
 
         <Divider style={{ marginVertical: 16 }} />
 
@@ -119,6 +127,33 @@ const ProfileScreen = () => {
         >
           Log Out
         </Button>
+
+        <Modal visible={modalVisible} animationType="slide" transparent>
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 20,
+          }}>
+            <Surface style={{ padding: 20, borderRadius: 12, width: '100%', maxWidth: 350 }}>
+              <Text style={{ marginBottom: 10, fontSize: 18, textAlign: 'center' }}>Update Profile Image</Text>
+              
+              {image && (
+                
+                <Image source={{ uri: image.uri }}style={{ width: 150, height: 150, alignSelf: 'center', borderRadius: 75 }} />
+                
+                
+              )}
+              <Button mode="outlined" onPress={pickImage} style={{ marginTop: 10 }}>Choose Image</Button>
+              
+              
+              <Button mode="contained" onPress={handleSaveImage} style={{ marginTop: 10 }}>Save</Button>
+              
+              <Button onPress={() => setModalVisible(false)} style={{ marginTop: 10 }}>Cancel</Button>
+            </Surface>
+          </View>
+        </Modal>
       </SafeAreaView>
     </ScrollView>
   );

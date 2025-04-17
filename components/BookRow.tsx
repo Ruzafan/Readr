@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   View,
@@ -15,6 +15,7 @@ const screenWidth = Dimensions.get("window").width;
 
 export function BookRow({ book, customLibrary }: { book: Book, customLibrary: boolean }) {
   const router = useRouter();
+  const [wished, setWished] = useState(book.wished || false);
   const handlePress = () => {
     const route = customLibrary ? "/userBookDetail" : "/bookDetail";
     router.push({
@@ -26,6 +27,7 @@ export function BookRow({ book, customLibrary }: { book: Book, customLibrary: bo
   const handleWishlist = () => {
     wishlist(book.id as string);
     book.wished = !book.wished;
+    setWished(book.wished);
   };
 
   return (
@@ -43,7 +45,7 @@ export function BookRow({ book, customLibrary }: { book: Book, customLibrary: bo
           size={20}
           onPress={handleWishlist}
           style={styles.wishlistButton}
-          iconColor={book.wished ? "red" : "white"}
+          iconColor={wished? "red" : "white"}
         />
       }
     </View>

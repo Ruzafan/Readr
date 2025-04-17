@@ -46,7 +46,7 @@ export const getBooksList = async (page: number, searchText: string) => {
 };
 
 // Assign a book to a user
-export const assignBookToUser = async (bookId: string, rating: number, comments: string) => {
+export const assignBookToUser = async (bookId: string) => {
   try {
     const body = { BookId: bookId };
     console.log(body);
