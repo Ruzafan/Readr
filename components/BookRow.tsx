@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
   },
   wishlistButton: {
     position: "absolute",
-    top: 12,
-    right: 12,
+    bottom: 5,
+    right: 5,
     backgroundColor: "rgba(0,0,0,0.5)",
   },
 });
