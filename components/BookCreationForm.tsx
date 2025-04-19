@@ -24,6 +24,8 @@ export default function BookCreationForm({ onSubmit, onCancel }: BookFormProps) 
   const [author, setAuthor] = useState('');
   const [genres, setGenres] = useState('');
   const [description, setDescription] = useState('');
+  const [pages, setPages] = useState('');
+
   const [image, setImage] = useState<{
     uri: string;
     name: string;
@@ -62,6 +64,7 @@ export default function BookCreationForm({ onSubmit, onCancel }: BookFormProps) 
       genres: genres.split(',').map((g) => g.trim()),
       description,
       image: image,
+      pages: parseInt(pages) || 0,
     };
 
     onSubmit(newBook);
@@ -87,6 +90,15 @@ export default function BookCreationForm({ onSubmit, onCancel }: BookFormProps) 
               onChangeText={setAuthor}
               mode="outlined"
               style={styles.input}
+            />
+
+            <TextInput
+                label="Pages"
+                value={pages}
+                onChangeText={setPages}
+                mode="outlined"
+                keyboardType="numeric"
+                style={styles.input}
             />
 
             <TextInput

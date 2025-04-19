@@ -11,7 +11,7 @@ export default function HomeScreen() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
-
+  
   useFocusEffect(
     useCallback(() => {
       const checkToken = async () => {
@@ -34,8 +34,8 @@ export default function HomeScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {loading ? (
         <View style={{ padding: 16, alignItems: 'center' }}>
-          <ActivityIndicator size="large" />
-        </View>
+                  <ActivityIndicator size="large" />
+                </View>
       ) : token != '' ? (
         <BookGrid />
       ) : (

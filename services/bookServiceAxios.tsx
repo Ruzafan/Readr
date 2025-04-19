@@ -37,7 +37,8 @@ export const getBook = async (bookId: string) => {
 // Get list of books with pagination
 export const getBooksList = async (page: number, searchText: string) => {
   try {
-    const response = await api.get(`/books/v1?page=${page}&rows=20&filter=${searchText}`);
+    const url =`/books/v1?page=${page}&rows=20&filter=${searchText}`;
+    const response = await api.get(url);
     return response.data;
   } catch (error) {
     console.error(error);

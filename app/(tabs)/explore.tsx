@@ -7,6 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { createBook, getBooksList } from '@/services/bookServiceAxios';
+import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BookCreationForm from '@/components/BookCreationForm';
 import { ActivityIndicator, Searchbar, useTheme, FAB } from 'react-native-paper';
@@ -17,54 +18,55 @@ export default function TabTwoScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const insets = useSafeAreaInsets();
-  const theme = useTheme();
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [skipEffect, setSkipEffect] = useState(false);
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
+  // 1. Reset search when entering screen
+  useFocusEffect(
+    useCallback(() => {
+      setPage(1);
+      fetchBooks(1, searchText, true); // reset mode
+    }, [])
+  );
+
+  // 2. Pagination only
   useEffect(() => {
-    if (page === 1 && skipEffect) {
-      setSkipEffect(false);
-      return;
-    }
-    fetchBooks();
+    if (page === 1 || !hasMore) return;
+    fetchBooks(page, searchText);
   }, [page]);
 
-  const fetchBooks = async () => {
-    if (!hasMore || loading) return;
+  const fetchBooks = async (pageNumber: number, text: string, reset: boolean = false) => {
+    if (loading) return;
 
+    console.log(`${reset ? 'Resetting' : 'Fetching'} books (page ${pageNumber}) with "${text}"`);
     setLoading(true);
+
     try {
-      const results = await getBooksList(page, searchText);
-      if (!results || results.length === 0) {
-        setHasMore(false);
+      const results = await getBooksList(pageNumber, text);
+      if (reset) {
+        setSearchResults(results ?? []);
       } else {
-        setSearchResults(prev => [...prev, ...results]);
+        setSearchResults(prev => [...prev, ...(results ?? [])]);
       }
+      setHasMore((results?.length ?? 0) > 20);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error('Search error:', error);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const startNewSearch = async () => {
-    setLoading(true);
-    setSearchResults([]);
-    setHasMore(true);
-    setSkipEffect(true);
+  const handleSearchSubmit = () => {
     setPage(1);
-    try {
-      const results = await getBooksList(1, searchText);
-      setSearchResults(results ?? []);
-      setHasMore((results?.length ?? 0) > 0);
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchResults([]);
-      setHasMore(false);
-    } finally {
-      setLoading(false);
+    fetchBooks(1, searchText, true);
+  };
+
+  const handleMore = () => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
     }
   };
 
@@ -74,24 +76,17 @@ export default function TabTwoScreen() {
     try {
       await createBook(bookData);
       setSearchText(bookData.title);
-      await startNewSearch();
+      setPage(1);
+      fetchBooks(1, bookData.title, true);
     } catch (error) {
-      console.error("Error creating book:", error);
+      console.error('Error creating book:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMore = () => {
-    if (!loading && hasMore) {
-      setPage(prev => prev + 1);
-    }
-  };
-
   const renderBook = useCallback(
-    ({ item }: { item: any }) => (
-      <BookRow book={item} customLibrary={false} />
-    ),
+    ({ item }: { item: any }) => <BookRow book={item} customLibrary={false} />,
     []
   );
 
@@ -102,8 +97,8 @@ export default function TabTwoScreen() {
           placeholder="Search books..."
           value={searchText}
           onChangeText={setSearchText}
-          onSubmitEditing={startNewSearch}
-          onIconPress={startNewSearch}
+          onSubmitEditing={handleSearchSubmit}
+          onIconPress={handleSearchSubmit}
         />
       </View>
 
@@ -132,8 +127,8 @@ export default function TabTwoScreen() {
           contentContainerStyle={{
             padding: 16,
             paddingBottom: 50 + insets.bottom,
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
           }}
           style={{ flex: 1 }}
         />
