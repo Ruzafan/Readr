@@ -23,15 +23,16 @@ export default function TabTwoScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  // 1. Reset search when entering screen
   useFocusEffect(
     useCallback(() => {
-      setPage(1);
-      fetchBooks(1, searchText, true); // reset mode
+      if(searchResults.length === 0) {
+        setPage(1);
+        fetchBooks(1, searchText, true); 
+      }
+      
     }, [])
   );
 
-  // 2. Pagination only
   useEffect(() => {
     if (page === 1 || !hasMore) return;
     fetchBooks(page, searchText);
@@ -40,7 +41,7 @@ export default function TabTwoScreen() {
   const fetchBooks = async (pageNumber: number, text: string, reset: boolean = false) => {
     if (loading) return;
 
-    console.log(`${reset ? 'Resetting' : 'Fetching'} books (page ${pageNumber}) with "${text}"`);
+    if(page <= 1)
     setLoading(true);
 
     try {
@@ -125,7 +126,7 @@ export default function TabTwoScreen() {
           removeClippedSubviews
           initialNumToRender={12}
           contentContainerStyle={{
-            padding: 16,
+            padding: 6,
             paddingBottom: 50 + insets.bottom,
             justifyContent: 'flex-start',
             alignItems: 'flex-start',
