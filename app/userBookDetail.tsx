@@ -41,8 +41,8 @@ export default function BookDetailScreen() {
         value: 'Owned',
         list: [
             { _id: "1", value: "Owned" },
-            { _id: "2", value: "Rented" },
-            { _id: "3", value: "Lent" },
+            { _id: "3", value: "Rented" },
+            { _id: "4", value: "Lent" },
         ],
         selectedList: [{ _id: "1", value: "Owned" }],
         error: ''

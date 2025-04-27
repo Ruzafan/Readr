@@ -12,7 +12,7 @@ type BookGridProps = {
   loading?: boolean;
 };
 
-export function BookGrid({ books, onLoadMore, loading = false }: BookGridProps) {
+export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
   const [bookList, setBookList] = useState<Book[]>([]);
   const [page, setPage] = useState(1);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
