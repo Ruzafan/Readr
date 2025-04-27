@@ -61,11 +61,12 @@ export const assignBookToUser = async (bookId: string) => {
 
 export const updateBook = async (book: object) => {
   try {
-    const response = await api.post(`/userbook/v1`, book);
+    console.log(book);
+    const response = await api.patch(`/book/v1`, book);
     return response.data;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error;
   }
 }
 

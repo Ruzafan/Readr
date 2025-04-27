@@ -1,16 +1,16 @@
 import Book from '@/models/book';
 import { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Dimensions, Alert, Image } from 'react-native';
+import { View, ScrollView, StyleSheet, Dimensions, Alert, Image, TextInput } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { getBook, assignBookToUser, deleteBook } from '@/services/bookServiceAxios';
+import { getBook, assignBookToUser, deleteBook, updateBook } from '@/services/bookServiceAxios';
 import {
   Text,
   Card,
   Title,
-  Paragraph,
   Divider,
   Chip,
   Button,
+  IconButton,
   useTheme
 } from 'react-native-paper';
 
@@ -18,11 +18,13 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function BookDetailScreen() {
   const { bookId } = useLocalSearchParams();
-  const [book, setBook] = useState(new Book());
+  const [book, setBook] = useState<Book>(new Book());
   const [isAssigned, setIsAssigned] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const theme = useTheme();
   const navigation = useNavigation();
-  
+
+  const [newGenre, setNewGenre] = useState('');
 
   useEffect(() => {
     fetchBookData();
@@ -49,15 +51,13 @@ export default function BookDetailScreen() {
       alert('Error assigning the book. Please try again.');
     }
   };
+
   const handleDelete = async () => {
     Alert.alert(
       "Delete Book",
       "Are you sure you want to delete this book from your library?",
       [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
@@ -75,6 +75,35 @@ export default function BookDetailScreen() {
       ]
     );
   };
+
+  const handleSaveChanges = async () => {
+    try {
+      await updateBook({
+        bookid: bookId,
+        authors: book.authors,
+        genres: book.genres,
+        description: book.description,
+        pages: book.pages
+      });
+      alert('Changes saved!');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      alert('Failed to save changes.');
+    }
+  };
+
+  const handleAddGenre = () => {
+    if (newGenre.trim() !== '') {
+      setBook({ ...book, genres: [...(book.genres || []), newGenre] });
+      setNewGenre('');
+    }
+  };
+
+  const handleRemoveGenre = (index: number) => {
+    setBook({ ...book, genres: book.genres!.filter((_, i) => i !== index) });
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <Card style={styles.card}>
@@ -83,34 +112,99 @@ export default function BookDetailScreen() {
           <View style={styles.bookInfo}>
             <Card.Content>
               <Title>{book.title}</Title>
-              <Paragraph>{book.authors}</Paragraph>
+
+              {/* Authors */}
+              {isEditing ? (
+                <TextInput
+                  value={book.authors?.join(', ') || ''}
+                  onChangeText={(text) => setBook({ ...book, authors: text.split(',') })}
+                  placeholder="Authors"
+                  style={styles.input}
+                  placeholderTextColor={theme.colors.outline}
+                />
+              ) : (
+                <Text style={styles.fieldText}>{book.authors?.join(', ') || 'No authors listed.'}</Text>
+              )}
+
+              {/* Genres */}
               <View style={styles.chipsContainer}>
                 {book.genres?.map((genre, index) => (
-                  <Chip key={index} icon="tag" style={styles.chip}>
+                  <Chip
+                    key={index}
+                    icon="tag"
+                    onClose={isEditing ? () => handleRemoveGenre(index) : undefined}
+                    style={styles.chip}
+                  >
                     {genre}
                   </Chip>
                 ))}
               </View>
+
+              {isEditing && (
+                <View style={styles.genreInputRow}>
+                  <TextInput
+                    value={newGenre}
+                    onChangeText={setNewGenre}
+                    placeholder="Add genre..."
+                    style={[styles.input, { flex: 1 }]}
+                    placeholderTextColor={theme.colors.outline}
+                  />
+                  <Button onPress={handleAddGenre}>+</Button>
+                </View>
+              )}
             </Card.Content>
           </View>
         </View>
-        <Divider />
-        <Text style={{ fontWeight: 'bold', marginLeft: 12, marginTop: 20 }}>Description: </Text>
+
+        <Divider style={{ marginTop: 12 }} />
+
+        {/* Description */}
+        <Text style={styles.sectionTitle}>Description:</Text>
         <Card.Content>
-          <Text variant="bodyMedium">{book.description || 'No description available.'}</Text>
+          {isEditing ? (
+            <TextInput
+              multiline
+              value={book.description}
+              onChangeText={(text) => setBook({ ...book, description: text })}
+              placeholder="Description..."
+              style={[styles.input, { minHeight: 100, textAlignVertical: 'top' }]}
+              placeholderTextColor={theme.colors.outline}
+            />
+          ) : (
+            <Text style={styles.fieldText}>{book.description || 'No description available.'}</Text>
+          )}
+        </Card.Content>
+
+        <Divider style={{ marginTop: 20 }} />
+
+        {/* Pages */}
+        <Text style={styles.sectionTitle}>Pages:</Text>
+        <Card.Content>
+          {isEditing ? (
+            <TextInput
+              value={book.pages?.toString() || ''}
+              onChangeText={(text) => setBook({ ...book, pages: parseInt(text) || 0 })}
+              placeholder="Number of pages"
+              keyboardType="numeric"
+              style={styles.input}
+              placeholderTextColor={theme.colors.outline}
+            />
+          ) : (
+            <Text style={styles.fieldText}>{book.pages ? `${book.pages} pages` : 'No page count'}</Text>
+          )}
         </Card.Content>
       </Card>
 
+      {/* Assign or Assigned */}
       {!isAssigned && (
-            <Button
-              mode="contained"
-              onPress={handleAssignBook}
-              style={styles.assignButton}
-            >
-              Assign Book to Me
-            </Button>
+        <Button
+          mode="contained"
+          onPress={handleAssignBook}
+          style={styles.assignButton}
+        >
+          Assign Book to Me
+        </Button>
       )}
-
       {isAssigned && (
         <Card style={styles.confirmCard}>
           <Card.Content>
@@ -121,6 +215,28 @@ export default function BookDetailScreen() {
         </Card>
       )}
 
+      {/* Edit / Save Buttons */}
+        <View>
+          {!isEditing ? (
+            <Button
+              mode="contained"
+              onPress={() => setIsEditing(true)}
+              style={styles.editButton}
+            >
+              Edit
+            </Button>
+          ) : (
+            <Button
+              mode="contained"
+              onPress={handleSaveChanges}
+              style={styles.saveButton}
+            >
+              Save Changes
+            </Button>
+          )}
+        </View>
+
+      {/* Delete */}
       <Button
         mode="outlined"
         onPress={handleDelete}
@@ -165,20 +281,39 @@ const styles = StyleSheet.create({
     marginRight: 6,
     marginBottom: 6,
   },
-  descriptionCard: {
-    marginBottom: 16,
-    padding: 8,
+  genreInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
   },
-  formCard: {
-    padding: 12,
-    marginBottom: 16,
+  input: {
+    borderBottomWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    marginBottom: 8,
+    fontSize: 16,
   },
   sectionTitle: {
     fontWeight: 'bold',
     fontSize: 16,
+    marginLeft: 12,
+    marginTop: 20,
+    marginBottom: 6,
+  },
+  fieldText: {
+    fontSize: 16,
+    marginBottom: 8,
   },
   assignButton: {
     marginTop: 16,
+  },
+  editButton: {
+    marginTop: 16,
+    backgroundColor: '#3498db',
+  },
+  saveButton: {
+    marginTop: 16,
+    backgroundColor: '#27ae60',
   },
   confirmCard: {
     padding: 12,
