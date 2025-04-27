@@ -49,7 +49,7 @@ export const getBooksList = async (page: number, searchText: string) => {
 // Assign a book to a user
 export const assignBookToUser = async (bookId: string) => {
   try {
-    const body = { BookId: bookId };
+    const body = { BookId: bookId, Ownership: 1 };
     console.log(body);
     const response = await api.post(`/userbook/v1`, body);
     return response.data;
