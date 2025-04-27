@@ -50,7 +50,7 @@ export default function TabTwoScreen() {
       } else {
         setSearchResults(prev => [...prev, ...(results ?? [])]);
       }
-      setHasMore((results?.length ?? 0) > 20);
+      setHasMore((results?.length ?? 0) >= 20);
     } catch (error) {
       console.error('Search error:', error);
       setHasMore(false);
