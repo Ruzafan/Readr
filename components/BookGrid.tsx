@@ -10,9 +10,10 @@ type BookGridProps = {
   books?: Book[];
   onLoadMore?: () => void;
   loading?: boolean;
+  wishlist?:boolean;
 };
 
-export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
+export function BookGrid({ books, onLoadMore, loading = false, wishlist=false}: BookGridProps) {
   const [bookList, setBookList] = useState<Book[]>([]);
   const [page, setPage] = useState(1);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
         const token = await SecureStore.getItemAsync('token');
         if (token) {
           try {
-            const res = await getUserBooksList(page);
+            const res = await getUserBooksList(page, wishlist);
             setBookList(res);
           } catch (err) {
             console.error("Error loading books:", err);
@@ -37,7 +38,7 @@ export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
       };
       fetchBooks();
     }
-  }, [books, page]);
+  }, [books, page,wishlist]);
 
   const dataToRender = books || bookList;
 
@@ -54,11 +55,11 @@ export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
     if (!selectedGenre) return dataToRender;
     return dataToRender.filter(book => book.genres?.includes(selectedGenre));
   }, [dataToRender, selectedGenre]);
-
+  const title = wishlist ? "Wishlist": "My Library";
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1 }}>
       <View style={styles.header}>
-        <Text style={[styles.text, { color: theme.colors.onBackground }]}>My Library</Text>
+        <Text style={[styles.text, { color: theme.colors.onBackground }]}>{title}</Text>
         {allGenres.length > 0 && (
           <IconButton
             icon={filtersVisible ? "chevron-up" : "chevron-down"}
@@ -90,7 +91,7 @@ export function BookGrid({ books, onLoadMore, loading = false}: BookGridProps) {
         <FlatList
           data={filteredBooks}
           keyExtractor={(item) => item.id!.toString()}
-          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={true} />}
+          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={wishlist ? false:true} />}
           numColumns={3}
           contentContainerStyle={styles.bookGrid}
         />

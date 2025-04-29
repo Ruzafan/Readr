@@ -2,9 +2,9 @@ import Book from "@/models/book";
 import api from "./axiosApi"; // Import the Axios instance
 
 // Get user's book list
-export const getUserBooksList = async (page: number) => {
+export const getUserBooksList = async (page: number, wishlist: boolean) => {
   try {
-    const response = await api.get(`/userbook/v1/?page=${page}`);
+    const response = await api.get(`/userbook/v1/?page=${page}&wishlist=${wishlist}`);
     return response.data;
   } catch (error) {
     console.error(error);

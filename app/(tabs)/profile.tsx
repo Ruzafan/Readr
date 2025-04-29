@@ -9,7 +9,8 @@ import {
   Surface,
   Button,
   Text,
-  IconButton
+  IconButton,
+  FAB 
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
@@ -120,7 +121,18 @@ const ProfileScreen = () => {
         >
           Log Out
         </Button>
-
+        <FAB
+          icon="heart"
+          label="Wishlist"
+          style={{
+            position: 'absolute',
+            margin: 16,
+            right: 0,
+            bottom: 0,
+            backgroundColor: theme.colors.primary,
+          }}
+          onPress={() => router.push('/wishlist')}
+        />         
         <Modal visible={modalVisible} animationType="slide" transparent>
           <View style={{
             flex: 1,
@@ -144,7 +156,9 @@ const ProfileScreen = () => {
             </Surface>
           </View>
         </Modal>
+       
       </SafeAreaView>
+      
     </ScrollView>
   );
 };
