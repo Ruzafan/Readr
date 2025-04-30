@@ -12,6 +12,16 @@ export const getUserBooksList = async (page: number, wishlist: boolean) => {
   }
 };
 
+export const getFriendsWishlist = async (friendId:string) => {
+  try {
+    const response = await api.get(`/userbook/v1/?friendId=${friendId}&wishlist=true`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 // Get a specific user book
 export const getUserBook = async (bookId: string) => {
   try {

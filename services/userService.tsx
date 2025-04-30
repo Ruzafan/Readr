@@ -11,6 +11,29 @@ export const getUser = async () => {
   }
 }
 
+export const getFriendInfo = async (friendId:string) => {
+  try {
+    const url = BaseUserApiUrl + '/v1/friend?friendId='+friendId;
+    console.log(url);
+    var response = await apiUser.get(url);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export const addFriend = async (friendId:string) => {
+  try {
+    const body = { FriendId: friendId };
+    var response = await apiUser.patch(BaseUserApiUrl + '/v1/addfriend',body);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export const login = (userName: string, password: string) => {
   return fetch(BaseUserApiUrl + '/login/v1', {
     method: 'POST',
