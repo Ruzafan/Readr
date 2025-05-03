@@ -1,50 +1,100 @@
-# Welcome to your Expo app 👋
+# React Native Expo App Setup Guide
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Prerequisites
 
-## Get started
+Before you can run the app, you will need to install the necessary tools on your system. Follow the steps below to ensure that everything is set up correctly.
 
-1. Install dependencies
+### 1. Install [Node.js](https://nodejs.org/)
 
-   ```bash
-   npm install
-   ```
+You will need Node.js, which comes with npm (Node Package Manager), to manage dependencies.
 
-2. Start the app
+* Go to the [Node.js website](https://nodejs.org/) and download the LTS version.
+* Follow the installation instructions and make sure to include npm in the installation process.
 
-   ```bash
-    npx expo start
-   ```
+### 2. Install [Expo CLI](https://docs.expo.dev/get-started/installation/)
 
-In the output, you'll find options to open the app in a
+Expo CLI is a tool that helps in developing React Native apps.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+* Open PowerShell or Command Prompt and run the following command to install Expo CLI globally:
 
 ```bash
-npm run reset-project
+npm install -g expo-cli
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 3. Install [Git](https://git-scm.com/)
 
-## Learn more
+Git is required to clone the repository.
 
-To learn more about developing your project with Expo, look at the following resources:
+* Go to the [Git website](https://git-scm.com/) and download the latest version for Windows.
+* Follow the installation instructions, keeping the default options.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 4. Install [Android Studio](https://developer.android.com/studio)
 
-## Join the community
+To run the app on an Android emulator or a physical Android device, you'll need Android Studio.
 
-Join our community of developers creating universal apps.
+* Download and install Android Studio.
+* During installation, make sure to select **Android Virtual Device** (AVD) and **Android SDK**.
+* After installation, open Android Studio, and in the **SDK Manager**, make sure the **Android SDK** is installed.
+* Install the required Android emulators via **AVD Manager** to run the app on an emulator.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 5. Install [Visual Studio Code (VS Code)](https://code.visualstudio.com/)
+
+VS Code is a popular editor for React Native development.
+
+* Download and install the latest version of VS Code from the official website.
+* You can also install the **React Native Tools** extension for enhanced React Native development support in VS Code.
+
+### 6. Install Dependencies
+
+Once you have the necessary tools installed, follow these steps:
+
+1. Clone the repository to your local machine:
+
+```bash
+git clone <repository-url>
+```
+
+2. Navigate to the project directory:
+
+```bash
+cd <project-directory>
+```
+
+3. Install the required dependencies using npm:
+
+```bash
+npm install
+```
+
+### 7. Set up Android Emulator (Optional)
+
+If you don't have a physical Android device, you can use an Android emulator.
+
+* Open **Android Studio** and go to **Tools > AVD Manager** to create a new virtual device.
+* Once the emulator is set up, you can run the app on it.
+
+### 8. Running the App
+
+After setting up everything, you can now run the app.
+
+#### Start the Development Server:
+
+* To start the development server and launch the app on an emulator or physical device, run the following command:
+
+```bash
+expo start
+```
+
+This will open a browser window with the Expo DevTools.
+
+#### Running on a Physical Device:
+
+* If you have the **Expo Go** app installed on your physical Android or iOS device, you can scan the QR code from the Expo DevTools to open the app on your device.
+
+#### Running on an Emulator:
+
+* In the Expo DevTools, click on **Run on Android device/emulator** to launch the app on an emulator.
+
+### 9. Additional Tools (Optional)
+
+* If you are going to develop on iOS as well, you'll need to install [Xcode](https://developer.apple.com/xcode/), which is only available on macOS.
