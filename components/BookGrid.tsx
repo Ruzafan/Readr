@@ -11,9 +11,10 @@ type BookGridProps = {
   onLoadMore?: () => void;
   loading?: boolean;
   wishlist?:boolean;
+  customLibrary?:boolean;
 };
 
-export function BookGrid({ books, onLoadMore, loading = false, wishlist=false}: BookGridProps) {
+export function BookGrid({ books, onLoadMore, loading = false, customLibrary = true ,wishlist=false}: BookGridProps) {
   const [bookList, setBookList] = useState<Book[]>([]);
   const [page, setPage] = useState(1);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -91,7 +92,7 @@ export function BookGrid({ books, onLoadMore, loading = false, wishlist=false}: 
         <FlatList
           data={filteredBooks}
           keyExtractor={(item) => item.id!.toString()}
-          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={wishlist ? false:true} />}
+          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={wishlist || customLibrary} />}
           numColumns={3}
           contentContainerStyle={styles.bookGrid}
         />

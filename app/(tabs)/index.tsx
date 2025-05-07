@@ -37,7 +37,7 @@ export default function HomeScreen() {
                   <ActivityIndicator size="large" />
                 </View>
       ) : token != '' ? (
-        <BookGrid />
+        <BookGrid  customLibrary={true}/>
       ) : (
         <Login onLoginSuccess={setToken} />
       )}

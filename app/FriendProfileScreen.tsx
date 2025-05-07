@@ -73,7 +73,7 @@ const FriendProfileScreen = () => {
         <Title style={{ marginHorizontal: 16, marginBottom: 8 }}>
           Wishlist
         </Title>
-        <BookGrid books={wishlist || []} />
+        <BookGrid books={wishlist || []} wishlist={true} />
       </SafeAreaView>
     </ScrollView>
   );
