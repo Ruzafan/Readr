@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { ScrollView, Modal, View, Image, RefreshControl } from "react-native";
+import React, { useState, useCallback } from "react";
+import {
+  ScrollView,
+  Modal,
+  View,
+  Image,
+  RefreshControl,
+} from "react-native";
 import {
   Avatar,
   Title,
@@ -18,9 +24,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import * as ImagePicker from "expo-image-picker";
 import { getUser, uploadProfileImage, addFriend } from "@/services/userService";
-import { router } from "expo-router";
 import User from "@/models/user";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 const ProfileScreen = () => {
   const theme = useTheme();
@@ -36,19 +41,23 @@ const ProfileScreen = () => {
   const [friendUsername, setFriendUsername] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
+  const fetchUser = async () => {
+    const userData = await getUser();
+    setUser(userData);
+    setRefreshing(false);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchUser();
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUser();
+    }, [])
+  );
 
-  const fetchUser = async () => {
-    const userData = await getUser();
-    setUser(userData);
-  };
   const handleLogout = async () => {
     try {
       await SecureStore.deleteItemAsync("token");
@@ -86,8 +95,7 @@ const ProfileScreen = () => {
     try {
       await uploadProfileImage(image);
       setModalVisible(false);
-      const updatedUser = await getUser();
-      setUser(updatedUser);
+      fetchUser();
     } catch (error) {
       console.error("Failed to upload image:", error);
     }
@@ -100,26 +108,24 @@ const ProfileScreen = () => {
       await addFriend(friendUsername);
       setFriendUsername("");
       setFriendModalVisible(false);
-
-      // Refresh user data if needed
-      const updatedUser = await getUser();
-      setUser(updatedUser);
+      fetchUser();
     } catch (error) {
       console.error("Failed to send friend request:", error);
     }
   };
 
   return (
-    <ScrollView 
-      style={{ flex: 1, backgroundColor: theme.colors.background }} 
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    }>
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <SafeAreaView>
         <Surface
           style={{ padding: 24, margin: 16, borderRadius: 12, elevation: 2 }}
         >
-          <Title style={{ textAlign: "center" }}>{user?.name}</Title>
+          <Title style={{ textAlign: "center" }}>{user?.userName}</Title>
 
           <View style={{ alignItems: "center", marginBottom: 16 }}>
             <View style={{ position: "relative" }}>
@@ -141,9 +147,6 @@ const ProfileScreen = () => {
           <Title style={{ textAlign: "center" }}>
             {user?.name} {user?.surname}
           </Title>
-          <Caption style={{ textAlign: "center", marginBottom: 8 }}>
-            {user?.userName}
-          </Caption>
         </Surface>
 
         <Divider style={{ marginVertical: 16 }} />
@@ -189,10 +192,10 @@ const ProfileScreen = () => {
                 }
                 onPress={() => {
                   if (friend.status === 1) {
-                      router.push({
-                        pathname: "/FriendProfileScreen",
-                        params: { friendId: friend.id },
-                      });
+                    router.push({
+                      pathname: "/FriendProfileScreen",
+                      params: { friendId: friend.id },
+                    });
                   }
                 }}
               />

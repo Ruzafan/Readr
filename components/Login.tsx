@@ -21,8 +21,8 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [email, setEmail] = useState('marcramiro');
-  const [password, setPassword] = useState('123456lyon');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,8 +86,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       await SecureStore.setItemAsync('username', email);
       await SecureStore.setItemAsync('password', password);
       onLoginSuccess?.(response.token);
-    } catch (error) {
-      Alert.alert('Login Failed', error as string);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      const message = error?.message || 'An unexpected error occurred.';
+      Alert.alert('Login Failed', message);
     } finally {
       setLoading(false);
     }

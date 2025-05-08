@@ -10,53 +10,61 @@ type BookGridProps = {
   books?: Book[];
   onLoadMore?: () => void;
   loading?: boolean;
-  wishlist?:boolean;
-  customLibrary?:boolean;
+  wishlist?: boolean;
+  customLibrary?: boolean;
 };
 
-export function BookGrid({ books, onLoadMore, loading = false, customLibrary = true ,wishlist=false}: BookGridProps) {
+export function BookGrid({ books, onLoadMore, loading = false, customLibrary = true, wishlist = false }: BookGridProps) {
   const [bookList, setBookList] = useState<Book[]>([]);
   const [page, setPage] = useState(1);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [filtersVisible, setFiltersVisible] = useState(true);
   const [isLoadingBooks, setIsLoadingBooks] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
     if (!books) {
       const fetchBooks = async () => {
         setIsLoadingBooks(true);
-        const token = await SecureStore.getItemAsync('token');
-        if (token) {
-          try {
+        setHasError(false);
+        try {
+          const token = await SecureStore.getItemAsync('token');
+          if (token) {
             const res = await getUserBooksList(page, wishlist);
-            setBookList(res);
-          } catch (err) {
-            console.error("Error loading books:", err);
+            setBookList(res ?? []);
+          } else {
+            setHasError(true);
           }
+        } catch (err) {
+          console.error("Error loading books:", err);
+          setHasError(true);
         }
         setIsLoadingBooks(false);
       };
       fetchBooks();
     }
-  }, [books, page,wishlist]);
+  }, [books, page, wishlist]);
 
-  const dataToRender = books || bookList;
+  const dataToRender = useMemo(() => books ?? bookList ?? [], [books, bookList]);
 
   const allGenres = useMemo(() => {
     const genresSet = new Set<string>();
-    if(!dataToRender) return [];
     dataToRender.forEach(book => {
-      book.genres?.forEach(g => genresSet.add(g));
+      (book.genres ?? []).forEach(g => genresSet.add(g));
     });
     return Array.from(genresSet).sort();
   }, [dataToRender]);
 
   const filteredBooks = useMemo(() => {
     if (!selectedGenre) return dataToRender;
-    return dataToRender.filter(book => book.genres?.includes(selectedGenre));
+    return dataToRender.filter(book => (book.genres ?? []).includes(selectedGenre));
   }, [dataToRender, selectedGenre]);
-  const title = wishlist ? "Wishlist": "My Library";
+
+  const title = wishlist ? "Wishlist" : "My Library";
+
+  const showEmptyMessage = !isLoadingBooks && !loading && (hasError || !filteredBooks || filteredBooks.length === 0);
+
   return (
     <View style={{ backgroundColor: theme.colors.background, flex: 1 }}>
       <View style={styles.header}>
@@ -88,11 +96,24 @@ export function BookGrid({ books, onLoadMore, loading = false, customLibrary = t
 
       {(loading || isLoadingBooks) && <ActivityIndicator style={{ marginTop: 16 }} />}
 
-      {!loading && !isLoadingBooks && (
+      {showEmptyMessage && (
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyText, { color: theme.colors.onBackground }]}>
+            📚 404 — No books found!
+          </Text>
+          <Text style={[styles.emptySubText, { color: theme.colors.onBackground }]}>
+            Maybe your books took a vacation?
+          </Text>
+        </View>
+      )}
+
+      {!showEmptyMessage && (
         <FlatList
           data={filteredBooks}
           keyExtractor={(item) => item.id!.toString()}
-          renderItem={({ item }) => <BookRow key={item.id} book={item} customLibrary={wishlist || customLibrary} />}
+          renderItem={({ item }) => (
+            <BookRow key={item.id} book={item} customLibrary={wishlist || customLibrary} />
+          )}
           numColumns={3}
           contentContainerStyle={styles.bookGrid}
         />
@@ -128,5 +149,22 @@ const styles = StyleSheet.create({
   genreChip: {
     marginRight: 8,
     marginBottom: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 32,
+    paddingHorizontal: 16,
+  },
+  emptyText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

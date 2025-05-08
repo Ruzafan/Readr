@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   FlatList,
@@ -22,16 +22,18 @@ export default function TabTwoScreen() {
   const [hasMore, setHasMore] = useState(true);
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const hasLoadedRef = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
-      if(searchResults.length === 0) {
+      if (!hasLoadedRef.current) {
+        hasLoadedRef.current = true;
         setPage(1);
-        fetchBooks(1, searchText, true); 
+        fetchBooks(1, searchText, true);
       }
-      
     }, [])
   );
+
 
   useEffect(() => {
     if (page === 1 || !hasMore) return;
@@ -41,8 +43,8 @@ export default function TabTwoScreen() {
   const fetchBooks = async (pageNumber: number, text: string, reset: boolean = false) => {
     if (loading) return;
 
-    if(page <= 1)
-    setLoading(true);
+    if (page <= 1)
+      setLoading(true);
 
     try {
       const results = await getBooksList(pageNumber, text);

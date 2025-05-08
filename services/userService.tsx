@@ -34,21 +34,27 @@ export const addFriend = async (friendId:string) => {
   }
 }
 
-export const login = (userName: string, password: string) => {
-  return fetch(BaseUserApiUrl + '/login/v1', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({ "username": userName, "password": password }),
-  })
-    .then(response => response.json())
-    .then(user => user)
-    .catch(error => {
-      console.error(error);
+export const login = async (userName: string, password: string) => {
+  try {
+    const response = await fetch(BaseUserApiUrl + '/login/v1', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ username: userName, password: password }),
     });
-}
+
+    if (!response.ok) {
+      throw new Error('User or password incorrect');
+    }
+    const user = await response.json();
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 
 export const register = (userName: string, password: string, name: string, surname: string, image: any) => {
