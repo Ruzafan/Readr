@@ -14,6 +14,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { login, register } from '@/services/userService';
 import * as SecureStore from 'expo-secure-store';
+import { Ionicons } from '@expo/vector-icons'; // Import the icon component
 
 interface LoginProps {
   onLoginSuccess?: (token: string) => void;
@@ -31,6 +32,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     name: string;
     type: string;
   } | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -109,13 +111,25 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           onChangeText={setEmail}
         />
         <Text>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+              size={24}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </View>
 
         {isRegistering && (
           <>
@@ -186,6 +200,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
     backgroundColor: '#fff',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  passwordInput: {
+    flex: 1,
+    height: 48,
+    paddingHorizontal: 16,
+  },
+  eyeIcon: {
+    padding: 12,
   },
   button: {
     backgroundColor: '#4b7bec',

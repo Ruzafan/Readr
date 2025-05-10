@@ -59,7 +59,7 @@ export const login = async (userName: string, password: string) => {
 
 export const register = (userName: string, password: string, name: string, surname: string, image: any) => {
   const formData = new FormData();
-  formData.append('userName', userName);
+  formData.append('username', userName);
   formData.append('password', password);
   formData.append('name', name);
   formData.append('surname', surname);

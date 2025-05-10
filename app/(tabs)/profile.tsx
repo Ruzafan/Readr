@@ -101,7 +101,10 @@ const ProfileScreen = () => {
     }
   };
 
-  const sendFriendRequest = async () => {
+  const sendFriendRequest = async (friendName = "" ) => {
+    if(friendName) {
+      setFriendUsername(friendName);
+    }
     if (!friendUsername.trim()) return;
 
     try {
@@ -187,7 +190,10 @@ const ProfileScreen = () => {
                 )}
                 right={() =>
                   friend.status === 0 ? (
-                    <IconButton icon="clock-outline" />
+                    <IconButton
+                    icon="clock-outline"
+                    onPress={() => sendFriendRequest(friend.userName)}
+                    />
                   ) : null
                 }
                 onPress={() => {
@@ -325,7 +331,7 @@ const ProfileScreen = () => {
                 onChangeText={setFriendUsername}
                 style={{ marginBottom: 16 }}
               />
-              <Button mode="contained" onPress={sendFriendRequest}>
+              <Button mode="contained" onPress={() => sendFriendRequest("")}>
                 Send
               </Button>
               <Button

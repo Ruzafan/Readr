@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Modal,
   Text,
+  Platform, // Import Platform
 } from 'react-native';
 import { createBook, getBooksList } from '@/services/bookServiceAxios';
 import { useFocusEffect } from 'expo-router';
@@ -95,7 +96,8 @@ export default function TabTwoScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <View style={{ padding: 12 }}>
+      {/* Apply paddingTop conditionally for Android */}
+      <View style={{ paddingHorizontal: 12, paddingTop: Platform.OS === 'android' ? insets.top : 12, paddingBottom: 12 }}>
         <Searchbar
           placeholder="Search books..."
           value={searchText}

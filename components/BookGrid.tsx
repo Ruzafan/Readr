@@ -99,7 +99,7 @@ export function BookGrid({ books, onLoadMore, loading = false, customLibrary = t
       {showEmptyMessage && (
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyText, { color: theme.colors.onBackground }]}>
-            📚 404 — No books found!
+            📚 No books found!
           </Text>
           <Text style={[styles.emptySubText, { color: theme.colors.onBackground }]}>
             Maybe your books took a vacation?
