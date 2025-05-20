@@ -1,7 +1,7 @@
 import { StyleSheet, View, ScrollView, TextInput, Alert, Image } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
-import { getUserBook, updateBook, deleteUserBook } from "../services/bookServiceAxios";
+import { getUserBook, updateUserBook, deleteUserBook } from "../services/bookServiceAxios";
 import { getUser } from '@/services/userService';
 
 import {
@@ -74,10 +74,16 @@ export default function BookDetailScreen() {
         const fetchedBook = await getUserBook(params.bookId as string);
         setBook(fetchedBook);
         setDescription(fetchedBook.comments || '');
-        setRating(fetchedBook.rating || 4);
+        setRating(fetchedBook.rating || 0);
+        console.log(fetchedBook.readingStatus);
         setReadingStatus({
             ...readingStatus,
             value: fetchedBook.readingStatus || "Pending"
+        });
+
+        setOwnership({
+            ...ownership,
+            value: fetchedBook.Ownership || "Owned"
         });
         setStartDate(fetchedBook.startDate ? new Date(fetchedBook.startDate) : undefined);
         setEndDate(fetchedBook.endDate ? new Date(fetchedBook.endDate) : undefined);
@@ -101,7 +107,7 @@ export default function BookDetailScreen() {
     };
 
     const saveChanges = async () => {
-        await updateBook({
+        await updateUserBook({
             bookid: book.id,
             comments: description,
             genres: book.genres,
