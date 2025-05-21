@@ -112,7 +112,7 @@ export function BookGrid({ books, onLoadMore, loading = false, customLibrary = t
           data={filteredBooks}
           keyExtractor={(item) => item.id!.toString()}
           renderItem={({ item }) => (
-            <BookRow key={item.id} book={item} customLibrary={wishlist || customLibrary} />
+            <BookRow key={item.id} book={item} customLibrary={customLibrary} />
           )}
           numColumns={3}
           contentContainerStyle={styles.bookGrid}

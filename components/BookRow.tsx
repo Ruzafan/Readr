@@ -13,7 +13,7 @@ import { wishlist } from "../services/bookServiceAxios";
 
 const screenWidth = Dimensions.get("window").width;
 
-export function BookRow({ book, customLibrary }: { book: Book, customLibrary: boolean }) {
+export function BookRow({ book, customLibrary }: { book: Book, customLibrary: boolean}) {
   const router = useRouter();
   const [wished, setWished] = useState(book.wished || false);
   const handlePress = () => {
